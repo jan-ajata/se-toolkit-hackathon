@@ -52,7 +52,7 @@ Version 2 builds upon Version 1:
 The product must have these components each fulfilling a useful function: 
 - backend;
 - database;
-- end-user-facing Client (web, mobile or LLM-powered agent, e.g. `nanobot`).
+- end-user-facing client: web app, mobile app, or LLM-powered agent, e.g. `nanobot`.
 
 Note:
 - You can use the setup from Lab 8 or start from scratch.
