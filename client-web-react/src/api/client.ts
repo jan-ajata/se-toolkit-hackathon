@@ -8,11 +8,13 @@ import type {
 } from '../types/exoplanet';
 
 const API_BASE = import.meta.env.VITE_API_BASE || '';
+const API_KEY = import.meta.env.VITE_API_KEY || 'dev-api-key';
 
 async function fetchJson<T>(path: string, init?: RequestInit): Promise<T> {
   const response = await fetch(`${API_BASE}${path}`, {
     headers: {
       'Content-Type': 'application/json',
+      'X-API-Key': API_KEY,
       ...init?.headers,
     },
     ...init,
