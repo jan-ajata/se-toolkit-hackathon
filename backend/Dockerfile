@@ -9,14 +9,10 @@ ENV UV_PYTHON_DOWNLOADS=0
 
 WORKDIR /app
 COPY pyproject.toml .
-
-RUN --mount=type=cache,target=/root/.cache/uv \
-    uv sync --frozen --no-install-workspace
-
 COPY src/ ./src/
 
 RUN --mount=type=cache,target=/root/.cache/uv \
-    uv sync --frozen
+    uv sync
 
 # ---
 # Stage 2: runtime image

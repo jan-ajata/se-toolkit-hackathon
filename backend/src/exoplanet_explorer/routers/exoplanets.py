@@ -93,21 +93,6 @@ async def get_exoplanets(
     )
 
 
-@router.get("/{planet_id}", response_model=ExoplanetResponse)
-async def get_exoplanet(
-    planet_id: int,
-    session: AsyncSession = Depends(get_session),
-):
-    """Get a single exoplanet by ID."""
-    planet = await read_exoplanet(session, planet_id)
-    if planet is None:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Exoplanet not found",
-        )
-    return _to_response(planet)
-
-
 @router.get("/stats", response_model=ExoplanetStats)
 async def get_stats(session: AsyncSession = Depends(get_session)):
     """Get aggregate catalog statistics."""
@@ -154,3 +139,18 @@ async def calculate_survival(
         temperature_k=planet.equilibrium_temperature_k,
     )
     return CalculateResponse(**metrics)
+
+
+@router.get("/{planet_id}", response_model=ExoplanetResponse)
+async def get_exoplanet(
+    planet_id: int,
+    session: AsyncSession = Depends(get_session),
+):
+    """Get a single exoplanet by ID."""
+    planet = await read_exoplanet(session, planet_id)
+    if planet is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Exoplanet not found",
+        )
+    return _to_response(planet)

@@ -8,6 +8,7 @@ import csv
 import io
 import logging
 import os
+from urllib.parse import urlencode
 
 import httpx
 import asyncpg
@@ -32,8 +33,7 @@ ORDER BY pl_name ASC
 def build_url() -> str:
     """Build the TAP API URL with our query."""
     params = {"query": QUERY, "format": "csv"}
-    qs = "&".join(f"{k}={v}" for k, v in params.items())
-    return f"{TAP_URL}?{qs}"
+    return f"{TAP_URL}?{urlencode(params)}"
 
 
 async def fetch_exoplanets() -> list[dict]:

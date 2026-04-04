@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
-import type { Exoplanet, ExoplanetFilters, ExoplanetStats } from '../types/exoplanet';
-import { getExoplanets, getExoplanetStats } from '../api/client';
+import type { Exoplanet, ExoplanetFilters, ExoplanetStats } from './types/exoplanet';
+import { getExoplanets, getExoplanetStats } from './api/client';
 import StatsCards from './components/StatsCards';
 import FilterPanel from './components/FilterPanel';
 import ExoplanetList from './components/ExoplanetList';
@@ -26,12 +26,12 @@ export default function App() {
     setStatsError(null);
 
     getExoplanetStats()
-      .then((data) => {
+      .then((data: ExoplanetStats) => {
         if (!cancelled) {
           setStats(data);
         }
       })
-      .catch((err) => {
+      .catch((err: unknown) => {
         if (!cancelled) {
           setStatsError(err instanceof Error ? err.message : 'Failed to load stats');
         }
@@ -60,7 +60,7 @@ export default function App() {
           setTotal(data.total);
         }
       })
-      .catch((err) => {
+      .catch((err: unknown) => {
         if (!cancelled) {
           setError(err instanceof Error ? err.message : 'Failed to load planets');
         }
