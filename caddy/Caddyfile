@@ -1,0 +1,19 @@
+:80 {
+    # Proxy API requests to backend
+    handle /exoplanets* {
+        reverse_proxy backend:8000
+    }
+
+    handle /docs* {
+        reverse_proxy backend:8000
+    }
+
+    handle /openapi.json {
+        reverse_proxy backend:8000
+    }
+
+    # Serve React SPA for everything else
+    handle {
+        reverse_proxy client-web-react:80
+    }
+}
