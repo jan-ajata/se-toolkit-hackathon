@@ -1,0 +1,43 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+*.egg-info/
+dist/
+build/
+.venv/
+venv/
+ENV/
+
+# Node
+node_modules/
+client-web-react/dist/
+client-web-react/.vite/
+
+# Docker
+*.secret
+.env.secret
+.env.docker.secret
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# uv
+uv.lock
+
+# Ruff
+.ruff_cache/
+
+# pytest
+.pytest_cache/
+
+# Environment
+*.log
