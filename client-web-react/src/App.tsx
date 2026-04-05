@@ -131,6 +131,7 @@ export default function App() {
         <FilterPanel
           filters={filters}
           onFilterChange={handleFilterChange}
+          useRealValues={useRealValues}
         />
 
         <div className="results-header">

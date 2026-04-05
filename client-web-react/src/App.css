@@ -183,6 +183,48 @@ body {
   padding-top: 0.5rem;
 }
 
+/* Grouped range filter (min – max in one card) */
+.filter-range-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.filter-range-label {
+  font-size: 0.8rem;
+  color: var(--color-text-muted);
+  font-weight: 500;
+}
+
+.filter-range-inputs {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.filter-range-inputs input {
+  flex: 1;
+  background: var(--color-bg-input);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  padding: 0.5rem 0.75rem;
+  color: var(--color-text);
+  font-size: 0.9rem;
+  min-width: 0;
+}
+
+.filter-range-inputs input:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2);
+}
+
+.range-separator {
+  color: var(--color-text-muted);
+  font-weight: 600;
+  user-select: none;
+}
+
 .filter-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
