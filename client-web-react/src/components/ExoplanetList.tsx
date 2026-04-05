@@ -77,7 +77,7 @@ export default function ExoplanetList({ planets, loading, error, onSelectPlanet,
               <td>{planet.distance_light_years?.toFixed(1) ?? 'N/A'}</td>
               <td>{planet.discovery_method ?? 'N/A'}</td>
               <td>
-                {planet.habitable_zone ? (
+                {planet.insolation_flux != null && planet.insolation_flux >= 0.25 && planet.insolation_flux <= 1.1 ? (
                   <span className="badge badge-habitable">🌍 Habitable</span>
                 ) : (
                   <span className="badge badge-hostile">🔥 Hostile</span>

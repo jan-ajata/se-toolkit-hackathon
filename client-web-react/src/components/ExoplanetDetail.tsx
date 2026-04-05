@@ -21,7 +21,9 @@ export default function ExoplanetDetail({ planet, onClose, useRealValues }: Exop
 
         <div className="detail-header">
           <h2>{planet.name}</h2>
-          {planet.habitable_zone && <span className="badge badge-habitable">🌍 Habitable Zone</span>}
+          {planet.insolation_flux != null && planet.insolation_flux >= 0.25 && planet.insolation_flux <= 1.1 && (
+            <span className="badge badge-habitable">🌍 Habitable Zone</span>
+          )}
         </div>
 
         <div className="detail-stats">
