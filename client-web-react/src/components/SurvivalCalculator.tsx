@@ -108,57 +108,6 @@ export default function SurvivalCalculator({ planet }: SurvivalCalculatorProps) 
               </div>
             )}
           </div>
-
-          <div className="travel-times">
-            <h4>🚀 Travel Time to {results.planet_name}</h4>
-            <div className="travel-grid">
-              {results.travel_time_walking && (
-                <div className="travel-item">
-                  <span className="travel-icon">🚶</span>
-                  <div>
-                    <div className="travel-label">Walking (5 km/h)</div>
-                    <div className="travel-value">{results.travel_time_walking}</div>
-                  </div>
-                </div>
-              )}
-              {results.travel_time_car && (
-                <div className="travel-item">
-                  <span className="travel-icon">🚗</span>
-                  <div>
-                    <div className="travel-label">Car (100 km/h)</div>
-                    <div className="travel-value">{results.travel_time_car}</div>
-                  </div>
-                </div>
-              )}
-              {results.travel_time_plane && (
-                <div className="travel-item">
-                  <span className="travel-icon">✈️</span>
-                  <div>
-                    <div className="travel-label">Plane (900 km/h)</div>
-                    <div className="travel-value">{results.travel_time_plane}</div>
-                  </div>
-                </div>
-              )}
-              {results.travel_time_voyager && (
-                <div className="travel-item">
-                  <span className="travel-icon">🛸</span>
-                  <div>
-                    <div className="travel-label">Voyager 1 (61,000 km/h)</div>
-                    <div className="travel-value">{results.travel_time_voyager}</div>
-                  </div>
-                </div>
-              )}
-              {results.travel_time_light && (
-                <div className="travel-item travel-item-light">
-                  <span className="travel-icon">💡</span>
-                  <div>
-                    <div className="travel-label">Speed of Light</div>
-                    <div className="travel-value">{results.travel_time_light}</div>
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
         </div>
       )}
     </div>

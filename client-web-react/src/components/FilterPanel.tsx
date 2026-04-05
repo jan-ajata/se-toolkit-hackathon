@@ -4,10 +4,9 @@ import type { ExoplanetFilters } from '../types/exoplanet';
 interface FilterPanelProps {
   filters: ExoplanetFilters;
   onFilterChange: (filters: ExoplanetFilters) => void;
-  constellations: string[];
 }
 
-export default function FilterPanel({ filters, onFilterChange, constellations }: FilterPanelProps) {
+export default function FilterPanel({ filters, onFilterChange }: FilterPanelProps) {
   const [search, setSearch] = useState(filters.search ?? '');
 
   const handleSearchSubmit = useCallback(() => {
@@ -29,14 +28,6 @@ export default function FilterPanel({ filters, onFilterChange, constellations }:
     [filters, onFilterChange]
   );
 
-  const handleConstellationChange = useCallback(
-    (e: React.ChangeEvent<HTMLSelectElement>) => {
-      const value = e.target.value || undefined;
-      onFilterChange({ ...filters, constellation: value, page: 1 });
-    },
-    [filters, onFilterChange]
-  );
-
   const handleReset = useCallback(() => {
     setSearch('');
     onFilterChange({ page: 1, page_size: filters.page_size });
@@ -45,23 +36,26 @@ export default function FilterPanel({ filters, onFilterChange, constellations }:
   return (
     <div className="filter-panel">
       <h3>🔍 Filters</h3>
-      <div className="filter-grid">
-        <div className="filter-group">
-          <label>Search by name</label>
-          <div className="search-input-group">
-            <input
-              type="text"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && handleSearchSubmit()}
-              placeholder="e.g. Kepler-442b"
-            />
-            <button onClick={handleSearchSubmit} className="btn btn-primary">
-              Search
-            </button>
-          </div>
-        </div>
 
+      {/* Search bar — full width, separate row */}
+      <div className="filter-search-row">
+        <input
+          type="text"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          onKeyDown={(e) => e.key === 'Enter' && handleSearchSubmit()}
+          placeholder="Search by planet name, e.g. Kepler-442b"
+          className="search-input"
+        />
+        <button onClick={handleSearchSubmit} className="btn btn-primary">
+          Search
+        </button>
+        <button onClick={handleReset} className="btn btn-secondary">
+          Reset
+        </button>
+      </div>
+
+      <div className="filter-grid">
         <div className="filter-group">
           <label>Min Radius (×Earth)</label>
           <input
@@ -110,7 +104,7 @@ export default function FilterPanel({ filters, onFilterChange, constellations }:
           />
         </div>
 
-        <div className="filter-group">
+        <div className="filter-group filter-checkbox">
           <label className="checkbox-label">
             <input
               type="checkbox"
@@ -119,24 +113,6 @@ export default function FilterPanel({ filters, onFilterChange, constellations }:
             />
             Habitable Zone Only
           </label>
-        </div>
-
-        <div className="filter-group">
-          <label>Constellation</label>
-          <select value={filters.constellation ?? ''} onChange={handleConstellationChange}>
-            <option value="">All Constellations</option>
-            {constellations.map((c) => (
-              <option key={c} value={c}>
-                {c}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        <div className="filter-group">
-          <button onClick={handleReset} className="btn btn-secondary">
-            Reset Filters
-          </button>
         </div>
       </div>
     </div>

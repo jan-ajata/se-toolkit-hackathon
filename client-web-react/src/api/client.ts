@@ -37,7 +37,6 @@ export async function getExoplanets(filters: ExoplanetFilters = {}): Promise<Exo
   if (filters.min_mass != null) params.set('min_mass', String(filters.min_mass));
   if (filters.max_mass != null) params.set('max_mass', String(filters.max_mass));
   if (filters.habitable_zone != null) params.set('habitable_zone', String(filters.habitable_zone));
-  if (filters.constellation) params.set('constellation', filters.constellation);
   if (filters.page != null) params.set('page', String(filters.page));
   if (filters.page_size != null) params.set('page_size', String(filters.page_size));
 

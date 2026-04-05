@@ -83,7 +83,6 @@ async def fetch_exoplanets() -> list[dict]:
             "distance_light_years": _float(row.get("sy_dist")),
             "semi_major_axis_au": _float(row.get("pl_orbsmax")),
             "insolation_flux": _float(row.get("pl_insol")),
-            "constellation": "",
         })
 
     logger.info("Fetched %d exoplanets", len(planets))
@@ -118,7 +117,6 @@ async def seed_database() -> None:
                 distance_light_years DOUBLE PRECISION,
                 semi_major_axis_au DOUBLE PRECISION,
                 insolation_flux DOUBLE PRECISION,
-                constellation VARCHAR(100) DEFAULT '',
                 created_at TIMESTAMP DEFAULT NOW()
             );
         """)
@@ -147,7 +145,6 @@ async def seed_database() -> None:
                     p["distance_light_years"],
                     p["semi_major_axis_au"],
                     p["insolation_flux"],
-                    p["constellation"],
                 )
                 for p in planets
             ],
@@ -155,7 +152,7 @@ async def seed_database() -> None:
                 "name", "hostname", "discovery_year", "discovery_method",
                 "radius_earth", "mass_earth", "orbital_period_days",
                 "equilibrium_temperature_k", "distance_light_years",
-                "semi_major_axis_au", "insolation_flux", "constellation",
+                "semi_major_axis_au", "insolation_flux",
             ],
         )
 

@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import type { Exoplanet, ExoplanetFilters, ExoplanetStats } from './types/exoplanet';
 import { getExoplanets, getExoplanetStats } from './api/client';
 import StatsCards from './components/StatsCards';
@@ -12,6 +12,7 @@ export default function App() {
   const [total, setTotal] = useState(0);
   const [stats, setStats] = useState<ExoplanetStats | null>(null);
   const [selectedPlanet, setSelectedPlanet] = useState<Exoplanet | null>(null);
+  const [useRealValues, setUseRealValues] = useState(false);
 
   const [filters, setFilters] = useState<ExoplanetFilters>({ page: 1, page_size: 20 });
   const [loading, setLoading] = useState(true);
@@ -98,11 +99,6 @@ export default function App() {
     [filters]
   );
 
-  const constellations = useMemo(() => {
-    const unique = new Set(planets.map((p) => p.constellation).filter(Boolean));
-    return Array.from(unique).sort();
-  }, [planets]);
-
   const totalPages = Math.ceil(total / (filters.page_size ?? 20));
   const currentPage = filters.page ?? 1;
 
@@ -118,12 +114,23 @@ export default function App() {
       </header>
 
       <main className="app-main">
-        <StatsCards stats={stats} loading={statsLoading} error={statsError} />
+        <div className="toolbar">
+          <StatsCards stats={stats} loading={statsLoading} error={statsError} />
+          <label className="toggle-unit">
+            <input
+              type="checkbox"
+              checked={useRealValues}
+              onChange={(e) => setUseRealValues(e.target.checked)}
+            />
+            <span className="toggle-label">
+              {useRealValues ? '📏 Real Values' : '🌍 × Earth'}
+            </span>
+          </label>
+        </div>
 
         <FilterPanel
           filters={filters}
           onFilterChange={handleFilterChange}
-          constellations={constellations}
         />
 
         <div className="results-header">
@@ -137,6 +144,7 @@ export default function App() {
           loading={loading}
           error={error}
           onSelectPlanet={handleSelectPlanet}
+          useRealValues={useRealValues}
         />
 
         {totalPages > 1 && (
@@ -163,7 +171,7 @@ export default function App() {
       </main>
 
       {selectedPlanet && (
-        <ExoplanetDetail planet={selectedPlanet} onClose={handleCloseDetail} />
+        <ExoplanetDetail planet={selectedPlanet} onClose={handleCloseDetail} useRealValues={useRealValues} />
       )}
     </div>
   );

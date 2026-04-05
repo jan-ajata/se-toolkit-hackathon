@@ -11,8 +11,6 @@ export interface Exoplanet {
   distance_light_years: number | null;
   semi_major_axis_au: number | null;
   insolation_flux: number | null;
-  constellation: string;
-  habitable_zone: boolean;
 }
 
 export interface ExoplanetListResponse {
@@ -58,7 +56,6 @@ export interface ExoplanetFilters {
   min_mass?: number;
   max_mass?: number;
   habitable_zone?: boolean;
-  constellation?: string;
   page?: number;
   page_size?: number;
 }

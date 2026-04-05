@@ -22,7 +22,6 @@ class ExoplanetRecord(SQLModel, table=True):
     distance_light_years: float | None = None
     semi_major_axis_au: float | None = None
     insolation_flux: float | None = None
-    constellation: str = ""
     created_at: datetime = Field(
         default_factory=lambda: datetime.now(timezone.utc).replace(tzinfo=None)
     )
@@ -43,7 +42,6 @@ class ExoplanetResponse(SQLModel):
     distance_light_years: float | None
     semi_major_axis_au: float | None
     insolation_flux: float | None
-    constellation: str
     habitable_zone: bool
 
 

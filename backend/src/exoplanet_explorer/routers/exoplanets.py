@@ -43,7 +43,6 @@ def _to_response(record) -> ExoplanetResponse:
         distance_light_years=record.distance_light_years,
         semi_major_axis_au=record.semi_major_axis_au,
         insolation_flux=record.insolation_flux,
-        constellation=record.constellation,
         habitable_zone=habitable,
     )
 
@@ -56,7 +55,6 @@ async def get_exoplanets(
     min_mass: float | None = Query(None, description="Minimum mass (Earth masses)"),
     max_mass: float | None = Query(None, description="Maximum mass (Earth masses)"),
     habitable_zone: bool | None = Query(None, description="Filter by habitable zone"),
-    constellation: str | None = Query(None, description="Filter by constellation"),
     page: int = Query(1, ge=1, description="Page number"),
     page_size: int = Query(20, ge=1, le=100, description="Items per page"),
     session: AsyncSession = Depends(get_session),
@@ -71,7 +69,6 @@ async def get_exoplanets(
             min_mass=min_mass,
             max_mass=max_mass,
             habitable_zone=habitable_zone,
-            constellation=constellation,
             page=page,
             page_size=page_size,
         )

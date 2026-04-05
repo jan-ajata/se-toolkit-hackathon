@@ -70,6 +70,43 @@ body {
   padding-bottom: 3rem;
 }
 
+/* ===== Toolbar ===== */
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  align-items: center;
+}
+
+.toolbar .stats-grid {
+  flex: 1;
+  min-width: 0;
+}
+
+.toggle-unit {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  background: var(--color-bg-card);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.toggle-unit input[type="checkbox"] {
+  accent-color: var(--color-primary);
+  width: 18px;
+  height: 18px;
+}
+
+.toggle-label {
+  font-weight: 600;
+  font-size: 0.9rem;
+  user-select: none;
+}
+
 /* ===== Stats Grid ===== */
 .stats-grid {
   display: grid;
@@ -116,6 +153,36 @@ body {
   font-size: 1.1rem;
 }
 
+.filter-search-row {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+  margin-bottom: 1rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.filter-search-row .search-input {
+  flex: 1;
+  background: var(--color-bg-input);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  padding: 0.5rem 0.75rem;
+  color: var(--color-text);
+  font-size: 0.9rem;
+}
+
+.filter-search-row .search-input:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2);
+}
+
+.filter-checkbox {
+  justify-content: center;
+  padding-top: 0.5rem;
+}
+
 .filter-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
@@ -151,21 +218,11 @@ body {
   box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2);
 }
 
-.search-input-group {
-  display: flex;
-  gap: 0.5rem;
-}
-
-.search-input-group input {
-  flex: 1;
-}
-
 .checkbox-label {
   display: flex;
   align-items: center;
   gap: 0.5rem;
   cursor: pointer;
-  padding-top: 0.5rem;
 }
 
 /* ===== Buttons ===== */
@@ -428,46 +485,6 @@ body {
 
 .verdict-value {
   font-size: 1rem;
-  font-weight: 600;
-}
-
-/* ===== Travel Times ===== */
-.travel-times h4 {
-  margin-bottom: 1rem;
-  font-size: 1.1rem;
-}
-
-.travel-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-  gap: 0.75rem;
-}
-
-.travel-item {
-  background: var(--color-bg-card);
-  border-radius: var(--radius);
-  padding: 0.75rem;
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  border: 1px solid var(--color-border);
-}
-
-.travel-item-light {
-  border-color: var(--color-warning);
-}
-
-.travel-icon {
-  font-size: 1.5rem;
-}
-
-.travel-label {
-  font-size: 0.75rem;
-  color: var(--color-text-muted);
-}
-
-.travel-value {
-  font-size: 0.9rem;
   font-weight: 600;
 }
 
