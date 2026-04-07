@@ -8,6 +8,8 @@ import os
 import sys
 
 # Force-set required environment variables for tests (override any existing values)
+# NOTE: LLM vars are NOT overridden — if set in the environment, they'll be used
+# for live integration tests. Defaults are only set when not provided.
 _test_env = {
     "NAME": "Exoplanet Explorer Test",
     "DEBUG": "true",
@@ -21,14 +23,15 @@ _test_env = {
     "DB_NAME": "exoplanets_test",
     "DB_USER": "test_user",
     "DB_PASSWORD": "test_pass",
-    # LLM vars — optional, leave empty to test fallback behavior
-    "LLM_API_KEY": "",
-    "LLM_API_BASE_URL": "https://api.openai.com/v1",
-    "LLM_MODEL": "gpt-4o-mini",
 }
 
 for key, value in _test_env.items():
     os.environ[key] = value
+
+# LLM vars — only set defaults if not already in environment
+os.environ.setdefault("LLM_API_KEY", "")
+os.environ.setdefault("LLM_API_BASE_URL", "https://api.openai.com/v1")
+os.environ.setdefault("LLM_MODEL", "gpt-4o-mini")
 
 # Clear any already-imported modules from cache so they'll be re-imported with new env
 _modules_to_clear = [m for m in sys.modules if m.startswith("exoplanet_explorer")]

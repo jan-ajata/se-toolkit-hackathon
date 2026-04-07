@@ -36,3 +36,6 @@ include = ["exoplanet_explorer*"]
 testpaths = ["../tests"]
 pythonpath = ["../src"]
 asyncio_mode = "auto"
+markers = [
+    "llm_live: marks tests as requiring a live LLM server (deselect with '-m \"not llm_live\"')",
+]
