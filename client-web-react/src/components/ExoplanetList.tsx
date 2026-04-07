@@ -10,9 +10,10 @@ interface ExoplanetListProps {
   error: string | null;
   onSelectPlanet: (planet: Exoplanet) => void;
   useRealValues: boolean;
+  compareMode?: boolean;
 }
 
-export default function ExoplanetList({ planets, loading, error, onSelectPlanet, useRealValues }: ExoplanetListProps) {
+export default function ExoplanetList({ planets, loading, error, onSelectPlanet, useRealValues, compareMode = false }: ExoplanetListProps) {
   if (loading) {
     return (
       <div className="planet-list-loading">
@@ -57,8 +58,15 @@ export default function ExoplanetList({ planets, loading, error, onSelectPlanet,
         </thead>
         <tbody>
           {planets.map((planet) => (
-            <tr key={planet.id} onClick={() => onSelectPlanet(planet)} className="planet-row">
-              <td className="planet-name">{planet.name}</td>
+            <tr
+              key={planet.id}
+              onClick={() => onSelectPlanet(planet)}
+              className={`planet-row ${compareMode ? 'compare-selectable' : ''}`}
+            >
+              <td className="planet-name">
+                {compareMode && '🔬 '}
+                {planet.name}
+              </td>
               <td>{planet.discovery_year ?? 'N/A'}</td>
               <td>
                 {useRealValues

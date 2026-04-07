@@ -86,7 +86,7 @@ export default function SurvivalCalculator({ planet }: SurvivalCalculatorProps) 
               <div className="verdict-icon">🌡️</div>
               <div className="verdict-content">
                 <div className="verdict-label">Temperature</div>
-                <div className="verdict-value">{results.temperature_verdict ?? 'N/A'}</div>
+                <div className="verdict-value">{results.temperature_verdict}</div>
               </div>
             </div>
 
@@ -94,19 +94,59 @@ export default function SurvivalCalculator({ planet }: SurvivalCalculatorProps) 
               <div className="verdict-icon">🏋️</div>
               <div className="verdict-content">
                 <div className="verdict-label">Gravity</div>
-                <div className="verdict-value">{results.gravity_verdict ?? 'N/A'}</div>
+                <div className="verdict-value">{results.gravity_verdict}</div>
               </div>
             </div>
 
-            {results.surface_gravity_m_s2 != null && (
+            {results.surface_gravity_ms2 != null && (
               <div className="verdict-card">
                 <div className="verdict-icon">📐</div>
                 <div className="verdict-content">
                   <div className="verdict-label">Surface Gravity</div>
-                  <div className="verdict-value">{results.surface_gravity_m_s2.toFixed(2)} m/s²</div>
+                  <div className="verdict-value">{results.surface_gravity_ms2.toFixed(2)} m/s²</div>
                 </div>
               </div>
             )}
+
+            {results.escape_velocity_kms != null && (
+              <div className="verdict-card">
+                <div className="verdict-icon">🚀</div>
+                <div className="verdict-content">
+                  <div className="verdict-label">Escape Velocity</div>
+                  <div className="verdict-value">{results.escape_velocity_kms.toFixed(2)} km/s</div>
+                </div>
+              </div>
+            )}
+          </div>
+
+          <div className="travel-times">
+            <h4>🛸 Travel Time to {results.planet_name}</h4>
+            <div className="travel-time-grid">
+              <div className="travel-time-item">
+                <span className="travel-mode">🚶 Walking</span>
+                <span className="travel-duration">{results.travel_time_walking}</span>
+              </div>
+              <div className="travel-time-item">
+                <span className="travel-mode">🚗 Car</span>
+                <span className="travel-duration">{results.travel_time_car}</span>
+              </div>
+              <div className="travel-time-item">
+                <span className="travel-mode">✈️ Plane</span>
+                <span className="travel-duration">{results.travel_time_plane}</span>
+              </div>
+              <div className="travel-time-item">
+                <span className="travel-mode">🛰️ Voyager 1</span>
+                <span className="travel-duration">{results.travel_time_voyager}</span>
+              </div>
+              <div className="travel-time-item">
+                <span className="travel-mode">💡 Light</span>
+                <span className="travel-duration">{results.travel_time_light}</span>
+              </div>
+              <div className="travel-time-item">
+                <span className="travel-mode">📡 Radio Signal to Earth</span>
+                <span className="travel-duration">{results.radio_signal_time_to_earth}</span>
+              </div>
+            </div>
           </div>
         </div>
       )}

@@ -3,8 +3,9 @@
 import asyncio
 import pytest
 import pytest_asyncio
-from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker, AsyncSession
+from sqlalchemy.ext.asyncio import create_async_engine
 from sqlmodel import SQLModel
+from sqlmodel.ext.asyncio.session import AsyncSession
 
 from exoplanet_explorer.db.exoplanets import (
     read_exoplanets,
@@ -22,6 +23,53 @@ def event_loop():
     loop.close()
 
 
+async def _seed_session(session: AsyncSession):
+    """Insert test data into the session."""
+    test_planets = [
+        ExoplanetRecord(
+            name="Kepler-442b",
+            hostname="Kepler-442",
+            discovery_year=2015,
+            discovery_method="Transit",
+            radius_earth=1.34,
+            mass_earth=2.3,
+            orbital_period_days=112.3,
+            equilibrium_temperature_k=260.0,
+            distance_light_years=1206.0,
+            semi_major_axis_au=0.409,
+            insolation_flux=0.57,
+        ),
+        ExoplanetRecord(
+            name="Proxima Centauri b",
+            hostname="Proxima Centauri",
+            discovery_year=2016,
+            discovery_method="Radial Velocity",
+            radius_earth=1.03,
+            mass_earth=1.27,
+            orbital_period_days=11.2,
+            equilibrium_temperature_k=234.0,
+            distance_light_years=4.24,
+            semi_major_axis_au=0.0485,
+            insolation_flux=0.65,
+        ),
+        ExoplanetRecord(
+            name="TRAPPIST-1e",
+            hostname="TRAPPIST-1",
+            discovery_year=2017,
+            discovery_method="Transit",
+            radius_earth=0.92,
+            mass_earth=0.69,
+            orbital_period_days=6.1,
+            equilibrium_temperature_k=251.0,
+            distance_light_years=40.7,
+            semi_major_axis_au=0.029,
+            insolation_flux=0.60,
+        ),
+    ]
+    session.add_all(test_planets)
+    await session.commit()
+
+
 @pytest_asyncio.fixture(scope="function")
 async def db_session():
     """Create a fresh SQLite in-memory database for each test."""
@@ -29,61 +77,12 @@ async def db_session():
     async with engine.begin() as conn:
         await conn.run_sync(SQLModel.metadata.create_all)
 
-    session_maker = async_sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
+    session = AsyncSession(bind=engine)
+    await _seed_session(session)
+    yield session
 
-    async with session_maker() as session:
-        # Insert test data
-        test_planets = [
-            ExoplanetRecord(
-                name="Kepler-442b",
-                hostname="Kepler-442",
-                discovery_year=2015,
-                discovery_method="Transit",
-                radius_earth=1.34,
-                mass_earth=2.3,
-                orbital_period_days=112.3,
-                equilibrium_temperature_k=260.0,
-                distance_light_years=1206.0,
-                semi_major_axis_au=0.409,
-                insolation_flux=0.57,
-                constellation="Lyra",
-            ),
-            ExoplanetRecord(
-                name="Proxima Centauri b",
-                hostname="Proxima Centauri",
-                discovery_year=2016,
-                discovery_method="Radial Velocity",
-                radius_earth=1.03,
-                mass_earth=1.27,
-                orbital_period_days=11.2,
-                equilibrium_temperature_k=234.0,
-                distance_light_years=4.24,
-                semi_major_axis_au=0.0485,
-                insolation_flux=0.65,
-                constellation="Centaurus",
-            ),
-            ExoplanetRecord(
-                name="TRAPPIST-1e",
-                hostname="TRAPPIST-1",
-                discovery_year=2017,
-                discovery_method="Transit",
-                radius_earth=0.92,
-                mass_earth=0.69,
-                orbital_period_days=6.1,
-                equilibrium_temperature_k=251.0,
-                distance_light_years=40.7,
-                semi_major_axis_au=0.029,
-                insolation_flux=0.60,
-                constellation="Aquarius",
-            ),
-        ]
-        session.add_all(test_planets)
-        await session.commit()
-
-    yield session_maker
-
-    async with engine.begin() as conn:
-        await conn.run_sync(SQLModel.metadata.drop_all)
+    await session.close()
+    await engine.dispose()
 
 
 class TestReadExoplanets:
@@ -92,49 +91,36 @@ class TestReadExoplanets:
     @pytest.mark.asyncio
     async def test_read_all(self, db_session):
         """Should return all planets when no filters."""
-        async with db_session() as session:
-            items, total = await read_exoplanets(session)
+        items, total = await read_exoplanets(db_session)
         assert total == 3
         assert len(items) == 3
 
     @pytest.mark.asyncio
     async def test_pagination(self, db_session):
         """Should respect page and page_size."""
-        async with db_session() as session:
-            items, total = await read_exoplanets(session, page=1, page_size=2)
+        items, total = await read_exoplanets(db_session, page=1, page_size=2)
         assert total == 3
         assert len(items) == 2
 
     @pytest.mark.asyncio
     async def test_search_by_name(self, db_session):
         """Should filter by name substring."""
-        async with db_session() as session:
-            items, total = await read_exoplanets(session, search="Kepler")
+        items, total = await read_exoplanets(db_session, search="Kepler")
         assert total == 1
         assert items[0].name == "Kepler-442b"
 
     @pytest.mark.asyncio
     async def test_habitable_zone_filter(self, db_session):
         """Should filter by habitable zone (insolation_flux between 0.25 and 1.1)."""
-        async with db_session() as session:
-            items, total = await read_exoplanets(session, habitable_zone=True)
+        items, total = await read_exoplanets(db_session, habitable_zone=True)
         # All 3 planets have insolation_flux in habitable range
         assert total == 3
 
     @pytest.mark.asyncio
     async def test_radius_filter(self, db_session):
         """Should filter by min/max radius."""
-        async with db_session() as session:
-            items, total = await read_exoplanets(session, min_radius=1.0, max_radius=1.5)
+        items, total = await read_exoplanets(db_session, min_radius=1.0, max_radius=1.5)
         assert total == 2  # Kepler-442b and Proxima Centauri b
-
-    @pytest.mark.asyncio
-    async def test_constellation_filter(self, db_session):
-        """Should filter by constellation."""
-        async with db_session() as session:
-            items, total = await read_exoplanets(session, constellation="Lyra")
-        assert total == 1
-        assert items[0].constellation == "Lyra"
 
 
 class TestReadExoplanet:
@@ -142,22 +128,15 @@ class TestReadExoplanet:
 
     @pytest.mark.asyncio
     async def test_read_by_id(self, db_session):
-        """Should return a planet by ID."""
-        async with db_session() as session:
-            items, _ = await read_exoplanets(session, search="Kepler-442b")
-            planet_id = items[0].id
-
-        async with db_session() as session:
-            planet = await read_exoplanet(session, planet_id)
-
+        """Should return a single planet by ID."""
+        planet = await read_exoplanet(db_session, 1)
         assert planet is not None
         assert planet.name == "Kepler-442b"
 
     @pytest.mark.asyncio
-    async def test_read_nonexistent_id(self, db_session):
-        """Should return None for nonexistent ID."""
-        async with db_session() as session:
-            planet = await read_exoplanet(session, 99999)
+    async def test_read_nonexistent(self, db_session):
+        """Should return None for nonexistent planet."""
+        planet = await read_exoplanet(db_session, 99999)
         assert planet is None
 
 
@@ -167,31 +146,25 @@ class TestReadExoplanetStats:
     @pytest.mark.asyncio
     async def test_stats_total_count(self, db_session):
         """Should return correct total count."""
-        async with db_session() as session:
-            stats = await read_exoplanet_stats(session)
+        stats = await read_exoplanet_stats(db_session)
         assert stats["total_count"] == 3
 
     @pytest.mark.asyncio
     async def test_stats_habitable_count(self, db_session):
         """Should count habitable zone planets."""
-        async with db_session() as session:
-            stats = await read_exoplanet_stats(session)
-        assert stats["habitable_count"] == 3
+        stats = await read_exoplanet_stats(db_session)
+        assert stats["habitable_zone_count"] == 3
 
     @pytest.mark.asyncio
     async def test_stats_closest_planet(self, db_session):
-        """Should find the closest planet (Proxima Centauri b at 4.24 ly)."""
-        async with db_session() as session:
-            stats = await read_exoplanet_stats(session)
+        """Should find closest planet by distance."""
+        stats = await read_exoplanet_stats(db_session)
         assert stats["closest_planet_name"] == "Proxima Centauri b"
         assert stats["closest_planet_distance_ly"] == pytest.approx(4.24)
 
     @pytest.mark.asyncio
     async def test_stats_detection_methods(self, db_session):
         """Should return detection method breakdown."""
-        async with db_session() as session:
-            stats = await read_exoplanet_stats(session)
-        assert "Transit" in stats["detection_methods"]
-        assert "Radial Velocity" in stats["detection_methods"]
+        stats = await read_exoplanet_stats(db_session)
         assert stats["detection_methods"]["Transit"] == 2
         assert stats["detection_methods"]["Radial Velocity"] == 1

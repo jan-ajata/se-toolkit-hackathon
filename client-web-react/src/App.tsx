@@ -1,10 +1,12 @@
 import { useState, useEffect, useCallback } from 'react';
 import type { Exoplanet, ExoplanetFilters, ExoplanetStats } from './types/exoplanet';
-import { getExoplanets, getExoplanetStats } from './api/client';
+import { getExoplanets, getExoplanetStats, getExoplanet } from './api/client';
 import StatsCards from './components/StatsCards';
 import FilterPanel from './components/FilterPanel';
 import ExoplanetList from './components/ExoplanetList';
 import ExoplanetDetail from './components/ExoplanetDetail';
+import PlanetOfDay from './components/PlanetOfDay';
+import ComparisonModal from './components/ComparisonModal';
 import './App.css';
 
 export default function App() {
@@ -13,6 +15,11 @@ export default function App() {
   const [stats, setStats] = useState<ExoplanetStats | null>(null);
   const [selectedPlanet, setSelectedPlanet] = useState<Exoplanet | null>(null);
   const [useRealValues, setUseRealValues] = useState(false);
+
+  // V2: Comparison state
+  const [compareMode, setCompareMode] = useState(false);
+  const [comparePlanets, setComparePlanets] = useState<Exoplanet[]>([]);
+  const [showComparison, setShowComparison] = useState(false);
 
   const [filters, setFilters] = useState<ExoplanetFilters>({ page: 1, page_size: 20 });
   const [loading, setLoading] = useState(true);
@@ -99,6 +106,41 @@ export default function App() {
     [filters]
   );
 
+  // V2: Comparison handlers
+  const handleToggleCompareMode = useCallback(() => {
+    setCompareMode((prev) => !prev);
+    setComparePlanets([]);
+    setShowComparison(false);
+  }, []);
+
+  const handleSelectForCompare = useCallback((planet: Exoplanet) => {
+    setComparePlanets((prev) => {
+      if (prev.length >= 2) return prev;
+      if (prev.find((p) => p.id === planet.id)) return prev;
+      return [...prev, planet];
+    });
+  }, []);
+
+  const handleLaunchComparison = useCallback(async () => {
+    if (comparePlanets.length !== 2) return;
+    setShowComparison(true);
+  }, [comparePlanets]);
+
+  const handleCloseComparison = useCallback(() => {
+    setShowComparison(false);
+    setComparePlanets([]);
+    setCompareMode(false);
+  }, []);
+
+  const handleExplorePlanetOfDay = useCallback(async (planetId: number) => {
+    try {
+      const planet = await getExoplanet(planetId);
+      setSelectedPlanet(planet);
+    } catch (err) {
+      // Silently fail - user can still find the planet manually
+    }
+  }, []);
+
   const totalPages = Math.ceil(total / (filters.page_size ?? 20));
   const currentPage = filters.page ?? 1;
 
@@ -114,19 +156,53 @@ export default function App() {
       </header>
 
       <main className="app-main">
+        {/* V2: Planet of the Day */}
+        <PlanetOfDay onExplorePlanet={handleExplorePlanetOfDay} />
+
         <div className="toolbar">
           <StatsCards stats={stats} loading={statsLoading} error={statsError} />
-          <label className="toggle-unit">
-            <input
-              type="checkbox"
-              checked={useRealValues}
-              onChange={(e) => setUseRealValues(e.target.checked)}
-            />
-            <span className="toggle-label">
-              {useRealValues ? '📏 Real Values' : '🌍 × Earth'}
-            </span>
-          </label>
+          <div className="toolbar-actions">
+            <button
+              onClick={handleToggleCompareMode}
+              className={`btn ${compareMode ? 'btn-primary' : 'btn-secondary'}`}
+            >
+              {compareMode ? '✖ Cancel Compare' : '🔬 Compare Planets'}
+            </button>
+            <label className="toggle-unit">
+              <input
+                type="checkbox"
+                checked={useRealValues}
+                onChange={(e) => setUseRealValues(e.target.checked)}
+              />
+              <span className="toggle-label">
+                {useRealValues ? '📏 Real Values' : '🌍 × Earth'}
+              </span>
+            </label>
+          </div>
         </div>
+
+        {/* V2: Compare mode banner */}
+        {compareMode && (
+          <div className="compare-mode-banner">
+            <span>
+              Select 2 planets to compare ({comparePlanets.length}/2 selected)
+            </span>
+            {comparePlanets.length === 2 && (
+              <button onClick={handleLaunchComparison} className="btn btn-primary">
+                🤖 Compare Now
+              </button>
+            )}
+            {comparePlanets.length > 0 && (
+              <div className="selected-for-compare">
+                {comparePlanets.map((p) => (
+                  <span key={p.id} className="selected-planet-tag">
+                    {p.name}
+                  </span>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
 
         <FilterPanel
           filters={filters}
@@ -144,8 +220,9 @@ export default function App() {
           planets={planets}
           loading={loading}
           error={error}
-          onSelectPlanet={handleSelectPlanet}
+          onSelectPlanet={compareMode ? handleSelectForCompare : handleSelectPlanet}
           useRealValues={useRealValues}
+          compareMode={compareMode}
         />
 
         {totalPages > 1 && (
@@ -171,8 +248,17 @@ export default function App() {
         )}
       </main>
 
-      {selectedPlanet && (
+      {!compareMode && selectedPlanet && (
         <ExoplanetDetail planet={selectedPlanet} onClose={handleCloseDetail} useRealValues={useRealValues} />
+      )}
+
+      {/* V2: Comparison Modal */}
+      {showComparison && comparePlanets.length === 2 && (
+        <ComparisonModal
+          planetA={comparePlanets[0]}
+          planetB={comparePlanets[1]}
+          onClose={handleCloseComparison}
+        />
       )}
     </div>
   );

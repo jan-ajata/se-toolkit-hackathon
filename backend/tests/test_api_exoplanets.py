@@ -11,29 +11,32 @@ from exoplanet_explorer.models.exoplanet import (
     ExoplanetListResponse,
     ExoplanetStats,
     CalculateResponse,
+    CompareResponse,
+    PlanetOfDayResponse,
 )
 from exoplanet_explorer.database import get_session
 from exoplanet_explorer.auth import verify_api_key
 
 
-def _make_mock_planet():
+def _make_mock_planet(**overrides):
     """Create a mock exoplanet response."""
-    return ExoplanetResponse(
-        id=1,
-        name="Kepler-442b",
-        hostname="Kepler-442",
-        discovery_year=2015,
-        discovery_method="Transit",
-        radius_earth=1.34,
-        mass_earth=2.3,
-        orbital_period_days=112.3,
-        equilibrium_temperature_k=260.0,
-        distance_light_years=1206.0,
-        semi_major_axis_au=0.409,
-        insolation_flux=0.57,
-        constellation="Lyra",
-        habitable_zone=True,
-    )
+    defaults = {
+        "id": 1,
+        "name": "Kepler-442b",
+        "hostname": "Kepler-442",
+        "discovery_year": 2015,
+        "discovery_method": "Transit",
+        "radius_earth": 1.34,
+        "mass_earth": 2.3,
+        "orbital_period_days": 112.3,
+        "equilibrium_temperature_k": 260.0,
+        "distance_light_years": 1206.0,
+        "semi_major_axis_au": 0.409,
+        "insolation_flux": 0.57,
+        "habitable_zone": True,
+    }
+    defaults.update(overrides)
+    return ExoplanetResponse(**defaults)
 
 
 @pytest.fixture
@@ -151,7 +154,7 @@ class TestGetExoplanetStats:
 
         mock_stats = {
             "total_count": 100,
-            "habitable_count": 25,
+            "habitable_zone_count": 25,
             "average_radius_earth": 1.5,
             "closest_planet_name": "Proxima Centauri b",
             "closest_planet_distance_ly": 4.24,
@@ -215,5 +218,99 @@ class TestCalculateEndpoint:
                 "/exoplanets/calculate",
                 json={"planet_id": 99999, "user_weight_kg": 70.0},
             )
+
+        assert response.status_code == 404
+
+
+class TestCompareEndpoint:
+    """Test POST /exoplanets/compare endpoint."""
+
+    def test_compare_two_planets(self, client):
+        """Should return 200 with comparison (fallback text when LLM disabled)."""
+        test_client, mock_session = client
+
+        mock_planet_a = _make_mock_planet()
+        mock_planet_b = _make_mock_planet(id=2, name="TRAPPIST-1e", radius_earth=0.92)
+
+        call_count = 0
+
+        async def mock_read(*args, **kwargs):
+            nonlocal call_count
+            call_count += 1
+            if call_count == 1:
+                return mock_planet_a
+            return mock_planet_b
+
+        with patch(
+            "exoplanet_explorer.routers.exoplanets.read_exoplanet",
+            side_effect=mock_read,
+        ):
+            response = test_client.post(
+                "/exoplanets/compare",
+                json={"planet_a_id": 1, "planet_b_id": 2},
+            )
+
+        assert response.status_code == 200
+        data = response.json()
+        assert data["planet_a"]["name"] == "Kepler-442b"
+        assert data["planet_b"]["name"] == "TRAPPIST-1e"
+        assert "comparison" in data
+        assert len(data["comparison"]) > 0
+
+    def test_compare_missing_planet_a(self, client):
+        """Should return 404 if planet A doesn't exist."""
+        test_client, mock_session = client
+
+        async def mock_read(*args, **kwargs):
+            return None
+
+        with patch(
+            "exoplanet_explorer.routers.exoplanets.read_exoplanet",
+            side_effect=mock_read,
+        ):
+            response = test_client.post(
+                "/exoplanets/compare",
+                json={"planet_a_id": 99999, "planet_b_id": 2},
+            )
+
+        assert response.status_code == 404
+
+
+class TestPlanetOfDayEndpoint:
+    """Test GET /exoplanets/planet-of-the-day endpoint."""
+
+    def test_planet_of_the_day(self, client):
+        """Should return 200 with a planet and fun fact."""
+        test_client, mock_session = client
+
+        mock_planet = _make_mock_planet()
+
+        async def mock_read(*args, **kwargs):
+            return ([mock_planet], 1)
+
+        with patch(
+            "exoplanet_explorer.routers.exoplanets.read_exoplanets",
+            side_effect=mock_read,
+        ):
+            response = test_client.get("/exoplanets/planet-of-the-day")
+
+        assert response.status_code == 200
+        data = response.json()
+        assert "planet" in data
+        assert "fun_fact" in data
+        assert data["planet"]["name"] == "Kepler-442b"
+
+    def test_planet_of_the_day_empty_catalog(self, client):
+        """Should return 404 if no planets in catalog."""
+        test_client, mock_session = client
+
+        async def mock_read(*args, **kwargs):
+            return ([], 0)
+
+        with patch(
+            "exoplanet_explorer.routers.exoplanets.read_exoplanets",
+            side_effect=mock_read,
+        ):
+            response = test_client.get("/exoplanets/planet-of-the-day")
 
         assert response.status_code == 404

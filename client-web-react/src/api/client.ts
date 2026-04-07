@@ -4,6 +4,9 @@ import type {
   ExoplanetStats,
   CalculateRequest,
   CalculateResponse,
+  CompareRequest,
+  CompareResponse,
+  PlanetOfDayResponse,
   ExoplanetFilters,
 } from '../types/exoplanet';
 
@@ -57,4 +60,15 @@ export async function calculateSurvival(payload: CalculateRequest): Promise<Calc
     method: 'POST',
     body: JSON.stringify(payload),
   });
+}
+
+export async function comparePlanets(payload: CompareRequest): Promise<CompareResponse> {
+  return fetchJson<CompareResponse>('/exoplanets/compare', {
+    method: 'POST',
+    body: JSON.stringify(payload),
+  });
+}
+
+export async function getPlanetOfDay(): Promise<PlanetOfDayResponse> {
+  return fetchJson<PlanetOfDayResponse>('/exoplanets/planet-of-the-day');
 }

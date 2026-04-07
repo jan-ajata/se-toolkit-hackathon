@@ -1,16 +1,17 @@
 export interface Exoplanet {
   id: number;
   name: string;
-  hostname: string | null;
-  discovery_year: number | null;
-  discovery_method: string | null;
-  radius_earth: number | null;
+  hostname: string;
+  discovery_year: number;
+  discovery_method: string;
+  radius_earth: number;
   mass_earth: number | null;
-  orbital_period_days: number | null;
+  orbital_period_days: number;
   equilibrium_temperature_k: number | null;
   distance_light_years: number | null;
   semi_major_axis_au: number | null;
   insolation_flux: number | null;
+  habitable_zone: boolean;
 }
 
 export interface ExoplanetListResponse {
@@ -23,8 +24,8 @@ export interface ExoplanetListResponse {
 export interface ExoplanetStats {
   total_count: number;
   habitable_zone_count: number;
-  average_radius_earth: number | null;
-  closest_planet_name: string | null;
+  average_radius_earth: number;
+  closest_planet_name: string;
   closest_planet_distance_ly: number | null;
   detection_methods: Record<string, number>;
 }
@@ -38,15 +39,32 @@ export interface CalculateResponse {
   planet_name: string;
   user_weight_kg: number;
   weight_on_planet_kg: number | null;
-  surface_gravity_m_s2: number | null;
-  gravity_ratio_to_earth: number | null;
-  travel_time_walking: string | null;
-  travel_time_car: string | null;
-  travel_time_plane: string | null;
-  travel_time_voyager: string | null;
-  travel_time_light: string | null;
-  temperature_verdict: string | null;
-  gravity_verdict: string | null;
+  surface_gravity_ms2: number | null;
+  escape_velocity_kms: number | null;
+  travel_time_walking: string;
+  travel_time_car: string;
+  travel_time_plane: string;
+  travel_time_voyager: string;
+  travel_time_light: string;
+  radio_signal_time_to_earth: string;
+  temperature_verdict: string;
+  gravity_verdict: string;
+}
+
+export interface CompareRequest {
+  planet_a_id: number;
+  planet_b_id: number;
+}
+
+export interface CompareResponse {
+  planet_a: Exoplanet;
+  planet_b: Exoplanet;
+  comparison: string;
+}
+
+export interface PlanetOfDayResponse {
+  planet: Exoplanet;
+  fun_fact: string;
 }
 
 export interface ExoplanetFilters {

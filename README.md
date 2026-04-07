@@ -1,8 +1,8 @@
 # 🪐 Exoplanet Explorer
 
-A web dashboard that lets you browse, filter, and calculate survival metrics for confirmed exoplanets.
+A web dashboard that lets you browse, filter, and calculate survival metrics for confirmed exoplanets — with AI-powered comparisons.
 
-> **One-liner:** Browse, filter, and calculate survival metrics for confirmed exoplanets — with AI-powered comparisons coming in V2.
+> **One-liner:** Browse, filter, and calculate survival metrics for confirmed exoplanets — with AI-powered comparisons and Planet of the Day.
 
 ---
 
@@ -58,29 +58,26 @@ Exoplanet Explorer provides a clean, accessible web interface to:
 
 ## Features
 
-### Implemented (V1)
+### Implemented (V1 + V2)
 - ✅ **Exoplanet catalog** — seeded from NASA Exoplanet Archive TAP API on first run
-- ✅ **Filterable list view** — search by name, filter by radius/mass, habitable zone, constellation
+- ✅ **Filterable list view** — search by name, filter by radius/mass, habitable zone
 - ✅ **Server-side pagination** — efficient loading of large datasets
 - ✅ **Planet detail modal** — full stats for any planet with one click
 - ✅ **"Could You Survive There?" calculator** — enter your weight, see:
   - Your weight on the planet
   - Surface gravity in m/s²
+  - Escape velocity in km/s
   - Travel time at walking, car, plane, Voyager 1, and light speeds
+  - Radio signal time to Earth
   - Temperature verdict (freeze / temperate / burn)
   - Gravity verdict (light / manageable / crushing)
 - ✅ **Aggregate stats** — total count, habitable zone count, closest planet, average radius
+- ✅ **AI-powered planet comparisons** — select two planets, get AI-generated natural-language comparison with side-by-side stats
+- ✅ **Planet of the Day** — daily featured planet with AI-generated fun fact
 - ✅ **Dark space theme UI** — responsive design with loading skeletons
 - ✅ **Docker Compose** — all services orchestrated (PostgreSQL, backend, frontend, Caddy)
 - ✅ **Swagger UI** — interactive API docs at `/docs`
-
-### Planned (V2)
-- 🔲 **LLM-powered planet comparisons** — select two planets, get AI-generated natural-language comparison
-- 🔲 **Planet of the Day** — LLM-generated fun fact about a notable exoplanet
-- 🔲 **Enhanced calculator** — escape velocity, radio signal time to Earth
-- 🔲 **Responsive mobile layout**
-- 🔲 **Expanded dataset** — 200+ exoplanets
-- 🔲 **TA feedback implementation**
+- ✅ **Full test suite** — calculator, DB layer, API endpoints, and LLM module tests
 
 ---
 
@@ -126,6 +123,9 @@ All variables are documented in `.env.example`. The most important ones:
 |---|---|---|
 | `DB_PASSWORD` | PostgreSQL password | `exoplanet_pass` |
 | `API_KEY` | Backend API key | `dev-api-key` |
+| `LLM_API_KEY` | OpenAI-compatible API key for AI features | _(empty)_ |
+| `LLM_API_BASE_URL` | LLM API base URL | `https://api.openai.com/v1` |
+| `LLM_MODEL` | LLM model name | `gpt-4o-mini` |
 | `BACKEND_PORT_EXTERNAL` | Backend port | `8000` |
 | `CLIENT_PORT_EXTERNAL` | Frontend port | `3000` |
 | `CADDY_HTTP_PORT` | Caddy proxy port | `8080` |
@@ -192,18 +192,20 @@ se-toolkit-hackathon/
 ├── backend/
 │   ├── src/exoplanet_explorer/
 │   │   ├── main.py              # FastAPI app, lifespan, middleware
-│   │   ├── settings.py          # Pydantic settings
+│   │   ├── settings.py          # Pydantic settings (+ LLM config)
 │   │   ├── database.py          # Async engine + session
 │   │   ├── auth.py              # API key verification
 │   │   ├── calculator.py        # Survival metrics calculations
+│   │   ├── llm.py               # LLM client (compare, fun fact)
 │   │   ├── models/exoplanet.py  # SQLModel models + Pydantic schemas
 │   │   ├── db/exoplanets.py     # DB operations
-│   │   ├── routers/exoplanets.py # API endpoints
+│   │   ├── routers/exoplanets.py # API endpoints (+ /compare, /planet-of-the-day)
 │   │   └── data/seed.py         # NASA TAP API seed script
 │   ├── tests/
 │   │   ├── test_calculator.py
 │   │   ├── test_db_exoplanets.py
-│   │   └── test_api_exoplanets.py
+│   │   ├── test_api_exoplanets.py
+│   │   └── test_llm.py
 │   ├── pyproject.toml
 │   └── Dockerfile
 ├── client-web-react/
@@ -211,7 +213,14 @@ se-toolkit-hackathon/
 │   │   ├── App.tsx              # Main app component
 │   │   ├── App.css              # Global styles
 │   │   ├── api/client.ts        # API client
-│   │   ├── components/          # React components
+│   │   ├── components/
+│   │   │   ├── ExoplanetList.tsx
+│   │   │   ├── ExoplanetDetail.tsx
+│   │   │   ├── SurvivalCalculator.tsx
+│   │   │   ├── FilterPanel.tsx
+│   │   │   ├── StatsCards.tsx
+│   │   │   ├── ComparisonModal.tsx    # V2: AI comparison
+│   │   │   └── PlanetOfDay.tsx        # V2: Featured planet
 │   │   └── types/exoplanet.ts   # TypeScript types
 │   ├── package.json
 │   ├── vite.config.ts
