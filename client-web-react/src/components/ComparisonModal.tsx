@@ -33,11 +33,6 @@ export default function ComparisonModal({ planetA, planetB, onClose }: Compariso
     }
   };
 
-  const formatValue = (value: number | null, suffix: string, multiplier = '× Earth'): string => {
-    if (value == null) return 'N/A';
-    return `${value.toFixed(2)} ${value === 1 ? '' : multiplier}`.replace(suffix, suffix).trim();
-  };
-
   return (
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal-content comparison-modal" onClick={(e) => e.stopPropagation()}>

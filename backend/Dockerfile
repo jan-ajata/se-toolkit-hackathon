@@ -11,7 +11,7 @@ COPY pyproject.toml .
 COPY src/ ./src/
 
 RUN --mount=type=cache,target=/root/.cache/uv \
-    uv sync --frozen --no-dev
+    uv sync --no-dev
 
 # ---
 # Stage 2: runtime image
