@@ -19,7 +19,6 @@ async def read_exoplanets(
     min_mass: float | None = None,
     max_mass: float | None = None,
     habitable_zone: bool | None = None,
-    constellation: str | None = None,
     page: int = 1,
     page_size: int = 20,
 ) -> tuple[list[ExoplanetRecord], int]:
@@ -71,12 +70,6 @@ async def read_exoplanets(
                     ExoplanetRecord.insolation_flux.is_(None),
                 )
             )
-
-    if constellation:
-        query = query.where(ExoplanetRecord.constellation.ilike(f"%{constellation}%"))
-        count_query = count_query.where(
-            ExoplanetRecord.constellation.ilike(f"%{constellation}%")
-        )
 
     result = await session.exec(count_query)
     total = result.one()

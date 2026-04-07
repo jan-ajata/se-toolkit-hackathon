@@ -65,6 +65,42 @@ def calculate_surface_gravity(
     return G * mass_kg / (radius_m ** 2)
 
 
+def calculate_escape_velocity(
+    planet_mass_earth: float | None,
+    planet_radius_earth: float,
+) -> float | None:
+    """Calculate escape velocity in km/s.
+
+    Formula: v_escape = sqrt(2 * G * M / R)
+    """
+    if planet_mass_earth is None or planet_mass_earth <= 0:
+        return None
+    if planet_radius_earth <= 0:
+        return None
+    mass_kg = planet_mass_earth * EARTH_MASS_KG
+    radius_m = planet_radius_earth * EARTH_RADIUS_M
+    v_escape_ms = math.sqrt(2 * G * mass_kg / radius_m)
+    return v_escape_ms / 1000  # Convert to km/s
+
+
+def calculate_radio_signal_time(
+    distance_light_years: float | None,
+) -> str:
+    """Calculate how long a radio signal would take to reach Earth.
+
+    Radio waves travel at the speed of light, so time = distance in years.
+    """
+    if distance_light_years is None or distance_light_years <= 0:
+        return "Unknown"
+    # Format with appropriate units
+    if distance_light_years < 1:
+        days = distance_light_years * 365.25
+        return f"{days:.1f} days"
+    if distance_light_years < 1000:
+        return f"{distance_light_years:,.1f} years"
+    return f"{distance_light_years:,.0f} years"
+
+
 def calculate_travel_time(
     distance_light_years: float | None,
     speed_kmh: float,
@@ -121,17 +157,22 @@ def calculate_survival_metrics(
     surface_gravity = calculate_surface_gravity(
         planet_mass_earth, planet_radius_earth
     )
+    escape_velocity = calculate_escape_velocity(
+        planet_mass_earth, planet_radius_earth
+    )
 
     return {
         "planet_name": planet_name,
         "user_weight_kg": user_weight_kg,
         "weight_on_planet_kg": round(weight_on_planet, 2) if weight_on_planet is not None else None,
         "surface_gravity_ms2": round(surface_gravity, 3) if surface_gravity is not None else None,
+        "escape_velocity_kms": round(escape_velocity, 3) if escape_velocity is not None else None,
         "travel_time_walking": calculate_travel_time(distance_light_years, WALKING_SPEED),
         "travel_time_car": calculate_travel_time(distance_light_years, CAR_SPEED),
         "travel_time_plane": calculate_travel_time(distance_light_years, PLANE_SPEED),
         "travel_time_voyager": calculate_travel_time(distance_light_years, VOYAGER_SPEED),
         "travel_time_light": f"{distance_light_years:,.1f} years" if distance_light_years else "Unknown",
+        "radio_signal_time_to_earth": calculate_radio_signal_time(distance_light_years),
         "temperature_verdict": get_temperature_verdict(temperature_k),
         "gravity_verdict": get_gravity_verdict(surface_gravity),
     }

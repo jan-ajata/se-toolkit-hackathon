@@ -22,7 +22,6 @@ class ExoplanetRecord(SQLModel, table=True):
     distance_light_years: float | None = None
     semi_major_axis_au: float | None = None
     insolation_flux: float | None = None
-    constellation: str = ""
     created_at: datetime = Field(
         default_factory=lambda: datetime.now(timezone.utc).replace(tzinfo=None)
     )
@@ -43,7 +42,6 @@ class ExoplanetResponse(SQLModel):
     distance_light_years: float | None
     semi_major_axis_au: float | None
     insolation_flux: float | None
-    constellation: str
     habitable_zone: bool
 
 
@@ -81,10 +79,34 @@ class CalculateResponse(SQLModel):
     user_weight_kg: float
     weight_on_planet_kg: float | None
     surface_gravity_ms2: float | None
+    escape_velocity_kms: float | None
     travel_time_walking: str
     travel_time_car: str
     travel_time_plane: str
     travel_time_voyager: str
     travel_time_light: str
+    radio_signal_time_to_earth: str
     temperature_verdict: str
     gravity_verdict: str
+
+
+class CompareRequest(SQLModel):
+    """Request body for the comparison endpoint."""
+
+    planet_a_id: int
+    planet_b_id: int
+
+
+class CompareResponse(SQLModel):
+    """Response from the comparison endpoint."""
+
+    planet_a: ExoplanetResponse
+    planet_b: ExoplanetResponse
+    comparison: str
+
+
+class PlanetOfDayResponse(SQLModel):
+    """Response for the planet of the day endpoint."""
+
+    planet: ExoplanetResponse
+    fun_fact: str
