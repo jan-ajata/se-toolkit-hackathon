@@ -51,6 +51,10 @@ services:
       DB_NAME: ${DB_NAME:-exoplanets}
       DB_USER: ${DB_USER:-exoplanet_user}
       DB_PASSWORD: ${DB_PASSWORD:-exoplanet_pass}
+      # LLM configuration (V2)
+      LLM_API_KEY: ${LLM_API_KEY:-}
+      LLM_API_BASE_URL: ${LLM_API_BASE_URL:-https://api.openai.com/v1}
+      LLM_MODEL: ${LLM_MODEL:-gpt-4o-mini}
     ports:
       - "${BACKEND_PORT_EXTERNAL:-8000}:8000"
     depends_on:

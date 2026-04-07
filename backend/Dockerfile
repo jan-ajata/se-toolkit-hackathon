@@ -4,7 +4,6 @@
 ARG REGISTRY_PREFIX_DOCKER_HUB
 FROM ${REGISTRY_PREFIX_DOCKER_HUB}astral/uv:python3.14-bookworm-slim AS builder
 ENV UV_COMPILE_BYTECODE=1 UV_LINK_MODE=copy
-ENV UV_NO_DEV=1
 ENV UV_PYTHON_DOWNLOADS=0
 
 WORKDIR /app
@@ -12,7 +11,7 @@ COPY pyproject.toml .
 COPY src/ ./src/
 
 RUN --mount=type=cache,target=/root/.cache/uv \
-    uv sync
+    uv sync --frozen --no-dev
 
 # ---
 # Stage 2: runtime image
