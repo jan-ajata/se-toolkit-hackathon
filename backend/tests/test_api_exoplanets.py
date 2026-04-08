@@ -11,7 +11,6 @@ from exoplanet_explorer.models.exoplanet import (
     ExoplanetListResponse,
     ExoplanetStats,
     CalculateResponse,
-    CompareResponse,
     PlanetOfDayResponse,
 )
 from exoplanet_explorer.database import get_session
@@ -28,6 +27,7 @@ def _make_mock_planet(**overrides):
         "discovery_method": "Transit",
         "radius_earth": 1.34,
         "mass_earth": 2.3,
+        "mass_estimated": False,
         "orbital_period_days": 112.3,
         "equilibrium_temperature_k": 260.0,
         "distance_light_years": 1206.0,
@@ -226,7 +226,7 @@ class TestCompareEndpoint:
     """Test POST /exoplanets/compare endpoint."""
 
     def test_compare_two_planets(self, client):
-        """Should return 200 with comparison (fallback text when LLM disabled)."""
+        """Should return 200 with numerical comparison and earth reference."""
         test_client, mock_session = client
 
         mock_planet_a = _make_mock_planet()
@@ -254,8 +254,9 @@ class TestCompareEndpoint:
         data = response.json()
         assert data["planet_a"]["name"] == "Kepler-442b"
         assert data["planet_b"]["name"] == "TRAPPIST-1e"
-        assert "comparison" in data
-        assert len(data["comparison"]) > 0
+        assert "earth_reference" in data
+        assert data["earth_reference"]["radius_earth"] == 1.0
+        assert data["earth_reference"]["temperature_k"] == 288
 
     def test_compare_missing_planet_a(self, client):
         """Should return 404 if planet A doesn't exist."""

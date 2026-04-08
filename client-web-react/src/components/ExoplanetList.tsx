@@ -1,4 +1,5 @@
 import type { Exoplanet } from '../types/exoplanet';
+import PlanetVisual from './PlanetVisual';
 
 // Physical constants for conversion
 const EARTH_RADIUS_KM = 6371;
@@ -43,6 +44,7 @@ export default function ExoplanetList({ planets, loading, error, onSelectPlanet,
       <table className="planet-table">
         <thead>
           <tr>
+            <th></th>
             <th>Name</th>
             <th>Discovery Year</th>
             <th>
@@ -63,6 +65,16 @@ export default function ExoplanetList({ planets, loading, error, onSelectPlanet,
               onClick={() => onSelectPlanet(planet)}
               className={`planet-row ${compareMode ? 'compare-selectable' : ''}`}
             >
+              <td className="planet-row-visual">
+                <PlanetVisual
+                  radiusEarth={planet.radius_earth}
+                  temperatureK={planet.equilibrium_temperature_k}
+                  insolationFlux={planet.insolation_flux}
+                  name=""
+                  size={32}
+                  showLabel={false}
+                />
+              </td>
               <td className="planet-name">
                 {compareMode && '🔬 '}
                 {planet.name}
@@ -78,9 +90,11 @@ export default function ExoplanetList({ planets, loading, error, onSelectPlanet,
               <td>
                 {useRealValues
                   ? planet.mass_earth != null
-                    ? (planet.mass_earth * EARTH_MASS_KG).toExponential(2)
+                    ? `${(planet.mass_earth * EARTH_MASS_KG).toExponential(2)}${planet.mass_estimated ? ' ≈' : ''}`
                     : 'N/A'
-                  : planet.mass_earth?.toFixed(3) ?? 'N/A'}
+                  : planet.mass_earth != null
+                    ? `${planet.mass_earth.toFixed(3)}${planet.mass_estimated ? ' ≈' : ''}`
+                    : 'N/A'}
               </td>
               <td>{planet.distance_light_years?.toFixed(1) ?? 'N/A'}</td>
               <td>{planet.discovery_method ?? 'N/A'}</td>

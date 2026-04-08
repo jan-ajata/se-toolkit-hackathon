@@ -5,7 +5,6 @@ import type {
   CalculateRequest,
   CalculateResponse,
   CompareRequest,
-  CompareResponse,
   PlanetOfDayResponse,
   ExoplanetFilters,
 } from '../types/exoplanet';
@@ -62,8 +61,8 @@ export async function calculateSurvival(payload: CalculateRequest): Promise<Calc
   });
 }
 
-export async function comparePlanets(payload: CompareRequest): Promise<CompareResponse> {
-  return fetchJson<CompareResponse>('/exoplanets/compare', {
+export async function comparePlanets(payload: CompareRequest): Promise<{ planet_a: Exoplanet; planet_b: Exoplanet; earth_reference: Record<string, number> }> {
+  return fetchJson<{ planet_a: Exoplanet; planet_b: Exoplanet; earth_reference: Record<string, number> }>('/exoplanets/compare', {
     method: 'POST',
     body: JSON.stringify(payload),
   });

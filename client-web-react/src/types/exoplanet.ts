@@ -6,6 +6,7 @@ export interface Exoplanet {
   discovery_method: string;
   radius_earth: number;
   mass_earth: number | null;
+  mass_estimated: boolean;
   orbital_period_days: number;
   equilibrium_temperature_k: number | null;
   distance_light_years: number | null;
@@ -59,7 +60,7 @@ export interface CompareRequest {
 export interface CompareResponse {
   planet_a: Exoplanet;
   planet_b: Exoplanet;
-  comparison: string;
+  earth_reference: Record<string, number>;
 }
 
 export interface PlanetOfDayResponse {

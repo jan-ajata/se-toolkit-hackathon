@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import type { PlanetOfDayResponse } from '../types/exoplanet';
 import { getPlanetOfDay } from '../api/client';
+import PlanetVisual from './PlanetVisual';
 
 interface PlanetOfDayProps {
   onExplorePlanet: (id: number) => void;
@@ -80,26 +81,38 @@ export default function PlanetOfDay({ onExplorePlanet }: PlanetOfDayProps) {
       </div>
 
       <div className="potd-planet-info">
-        <h4 className="potd-planet-name">{planet.name}</h4>
-        <div className="potd-quick-stats">
-          {planet.radius_earth != null && (
-            <span className="quick-stat">
-              <span className="stat-icon">🌍</span>
-              <span>{planet.radius_earth.toFixed(2)}× Earth radius</span>
-            </span>
-          )}
-          {planet.distance_light_years != null && (
-            <span className="quick-stat">
-              <span className="stat-icon">🌌</span>
-              <span>{planet.distance_light_years.toFixed(1)} ly away</span>
-            </span>
-          )}
-          {planet.discovery_year != null && (
-            <span className="quick-stat">
-              <span className="stat-icon">📅</span>
-              <span>Discovered {planet.discovery_year}</span>
-            </span>
-          )}
+        <div className="potd-planet-info-row">
+          <PlanetVisual
+            radiusEarth={planet.radius_earth}
+            temperatureK={planet.equilibrium_temperature_k}
+            insolationFlux={planet.insolation_flux}
+            name=""
+            size={60}
+            showLabel={false}
+          />
+          <div className="potd-planet-info-text">
+            <h4 className="potd-planet-name">{planet.name}</h4>
+            <div className="potd-quick-stats">
+              {planet.radius_earth != null && (
+                <span className="quick-stat">
+                  <span className="stat-icon">🌍</span>
+                  <span>{planet.radius_earth.toFixed(2)}× Earth radius</span>
+                </span>
+              )}
+              {planet.distance_light_years != null && (
+                <span className="quick-stat">
+                  <span className="stat-icon">🌌</span>
+                  <span>{planet.distance_light_years.toFixed(1)} ly away</span>
+                </span>
+              )}
+              {planet.discovery_year != null && (
+                <span className="quick-stat">
+                  <span className="stat-icon">📅</span>
+                  <span>Discovered {planet.discovery_year}</span>
+                </span>
+              )}
+            </div>
+          </div>
         </div>
       </div>
 

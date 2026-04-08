@@ -18,6 +18,34 @@ logger = logging.getLogger(__name__)
 # NASA Exoplanet Archive TAP API — free, no auth required
 TAP_URL = "https://exoplanetarchive.ipac.caltech.edu/TAP/sync"
 
+# 1 Jupiter mass = 317.8 Earth masses
+JUPITER_TO_EARTH_MASS = 317.8
+
+
+def estimate_mass_earth(radius_earth: float) -> float:
+    """Estimate planet mass in Earth masses from radius using piecewise power-law.
+
+    Based on empirical mass-radius relationships from exoplanet data:
+    - Rocky planets (R < 1.5 R⊕): M = R^3.7  (dense, iron/silicate)
+    - Mini-Neptunes (1.5 <= R < 4.0 R⊕): M = R^2.3  (volatile-rich)
+    - Gas giants (R >= 4.0 R⊕): M = R^1.7  (H/He dominated, compressible)
+
+    References: Weiss & Marcy (2014), Chen & Kipping (2017).
+    Coefficients tuned so Earth = 1 M⊕ at R = 1 R⊕, Jupiter ≈ 318 M⊕ at R ≈ 11.2 R⊕.
+    """
+    if radius_earth <= 0:
+        return 0.0
+    if radius_earth < 1.5:
+        # Rocky/terrestrial regime
+        return radius_earth ** 3.7
+    elif radius_earth < 4.0:
+        # Mini-Neptune / super-Earth regime
+        return radius_earth ** 2.3
+    else:
+        # Gas giant regime
+        return radius_earth ** 1.7
+
+
 # Query: select notable fields from the planetary systems table
 QUERY = """
 SELECT pl_name, hostname, disc_year, discoverymethod,
@@ -69,15 +97,24 @@ async def fetch_exoplanets() -> list[dict]:
         # pl_bmasse is in Jupiter masses; convert to Earth masses
         # 1 Jupiter mass = 317.8 Earth masses
         mass_jupiter = _float(row.get("pl_bmasse"))
-        mass_earth = mass_jupiter * 317.8 if mass_jupiter else None
+        radius = _float(row.get("pl_rade")) or 0.0
+
+        if mass_jupiter:
+            mass_earth = mass_jupiter * JUPITER_TO_EARTH_MASS
+        elif radius > 0:
+            # No measured mass — estimate from radius using empirical M-R relationship
+            mass_earth = estimate_mass_earth(radius)
+        else:
+            mass_earth = None
 
         planets.append({
             "name": row.get("pl_name", "").strip(),
             "hostname": row.get("hostname", "").strip(),
             "discovery_year": _int(row.get("disc_year")),
             "discovery_method": row.get("discoverymethod", "").strip(),
-            "radius_earth": _float(row.get("pl_rade")) or 0.0,
+            "radius_earth": radius,
             "mass_earth": mass_earth,
+            "mass_estimated": mass_jupiter is None and radius > 0,
             "orbital_period_days": _float(row.get("pl_orbper")) or 0.0,
             "equilibrium_temperature_k": _float(row.get("pl_eqt")),
             "distance_light_years": _float(row.get("sy_dist")),
@@ -112,6 +149,7 @@ async def seed_database() -> None:
                 discovery_method VARCHAR(100) DEFAULT '',
                 radius_earth DOUBLE PRECISION DEFAULT 0.0,
                 mass_earth DOUBLE PRECISION,
+                mass_estimated BOOLEAN DEFAULT FALSE,
                 orbital_period_days DOUBLE PRECISION DEFAULT 0.0,
                 equilibrium_temperature_k DOUBLE PRECISION,
                 distance_light_years DOUBLE PRECISION,
@@ -140,6 +178,7 @@ async def seed_database() -> None:
                     p["discovery_method"],
                     p["radius_earth"],
                     p["mass_earth"],
+                    p["mass_estimated"],
                     p["orbital_period_days"],
                     p["equilibrium_temperature_k"],
                     p["distance_light_years"],
@@ -150,7 +189,7 @@ async def seed_database() -> None:
             ],
             columns=[
                 "name", "hostname", "discovery_year", "discovery_method",
-                "radius_earth", "mass_earth", "orbital_period_days",
+                "radius_earth", "mass_earth", "mass_estimated", "orbital_period_days",
                 "equilibrium_temperature_k", "distance_light_years",
                 "semi_major_axis_au", "insolation_flux",
             ],

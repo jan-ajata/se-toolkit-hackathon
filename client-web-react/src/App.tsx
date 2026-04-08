@@ -121,7 +121,7 @@ export default function App() {
     });
   }, []);
 
-  const handleLaunchComparison = useCallback(async () => {
+  const handleLaunchComparison = useCallback(() => {
     if (comparePlanets.length !== 2) return;
     setShowComparison(true);
   }, [comparePlanets]);
@@ -189,7 +189,7 @@ export default function App() {
             </span>
             {comparePlanets.length === 2 && (
               <button onClick={handleLaunchComparison} className="btn btn-primary">
-                🤖 Compare Now
+                📊 Compare Now
               </button>
             )}
             {comparePlanets.length > 0 && (

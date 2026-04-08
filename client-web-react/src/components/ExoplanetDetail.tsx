@@ -1,5 +1,7 @@
 import type { Exoplanet } from '../types/exoplanet';
 import SurvivalCalculator from './SurvivalCalculator';
+import PlanetVisual from './PlanetVisual';
+import PlanetSizeCompare from './PlanetSizeCompare';
 
 // Physical constants for conversion
 const EARTH_RADIUS_KM = 6371;
@@ -26,6 +28,9 @@ export default function ExoplanetDetail({ planet, onClose, useRealValues }: Exop
           )}
         </div>
 
+        {/* Procedural planet visualization with Earth size comparison */}
+        <PlanetSizeCompare planet={planet} />
+
         <div className="detail-stats">
           <div className="detail-stat">
             <span className="stat-icon">📅</span>
@@ -41,10 +46,17 @@ export default function ExoplanetDetail({ planet, onClose, useRealValues }: Exop
               <div className="stat-value">{planet.discovery_method ?? 'N/A'}</div>
             </div>
           </div>
-          <div className="detail-stat">
-            <span className="stat-icon">🌍</span>
+          <div className="detail-stat detail-stat-planet-visual">
+            <PlanetVisual
+              radiusEarth={planet.radius_earth}
+              temperatureK={planet.equilibrium_temperature_k}
+              insolationFlux={planet.insolation_flux}
+              name=""
+              size={50}
+              showLabel={false}
+            />
             <div>
-              <div className="stat-label">Radius</div>
+              <div className="stat-label">Radius{planet.mass_estimated ? ' (est. mass)' : ''}</div>
               <div className="stat-value">
                 {useRealValues
                   ? planet.radius_earth != null
@@ -59,7 +71,7 @@ export default function ExoplanetDetail({ planet, onClose, useRealValues }: Exop
           <div className="detail-stat">
             <span className="stat-icon">⚖️</span>
             <div>
-              <div className="stat-label">Mass</div>
+              <div className="stat-label">Mass{planet.mass_estimated ? ' (estimated)' : ''}</div>
               <div className="stat-value">
                 {useRealValues
                   ? planet.mass_earth != null

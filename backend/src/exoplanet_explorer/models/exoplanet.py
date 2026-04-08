@@ -17,6 +17,7 @@ class ExoplanetRecord(SQLModel, table=True):
     discovery_method: str = ""
     radius_earth: float = 0.0
     mass_earth: float | None = None
+    mass_estimated: bool = False
     orbital_period_days: float = 0.0
     equilibrium_temperature_k: float | None = None
     distance_light_years: float | None = None
@@ -37,6 +38,7 @@ class ExoplanetResponse(SQLModel):
     discovery_method: str
     radius_earth: float
     mass_earth: float | None
+    mass_estimated: bool
     orbital_period_days: float
     equilibrium_temperature_k: float | None
     distance_light_years: float | None
@@ -102,7 +104,7 @@ class CompareResponse(SQLModel):
 
     planet_a: ExoplanetResponse
     planet_b: ExoplanetResponse
-    comparison: str
+    earth_reference: dict
 
 
 class PlanetOfDayResponse(SQLModel):

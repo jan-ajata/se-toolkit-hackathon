@@ -354,6 +354,16 @@ body {
   color: var(--color-accent);
 }
 
+.planet-row-visual {
+  width: 40px;
+  text-align: center;
+  vertical-align: middle;
+}
+
+.planet-row-visual .planet-sphere {
+  display: inline-block;
+}
+
 /* ===== Badges ===== */
 .badge {
   display: inline-block;
@@ -458,6 +468,17 @@ body {
 .detail-stat .stat-value {
   font-size: 1rem;
   font-weight: 600;
+}
+
+/* Detail stat with embedded planet visual */
+.detail-stat-planet-visual {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.detail-stat-planet-visual .planet-visual {
+  flex-shrink: 0;
 }
 
 /* ===== Survival Calculator ===== */
@@ -634,6 +655,17 @@ body {
 
 .potd-planet-info {
   margin-bottom: 1rem;
+}
+
+.potd-planet-info-row {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.potd-planet-info-text {
+  flex: 1;
+  min-width: 0;
 }
 
 .potd-planet-name {
@@ -894,6 +926,128 @@ body {
   color: var(--color-accent);
 }
 
+/* ===== Procedural Planet Visuals (CSS-only) ===== */
+
+/* Container for a single planet sphere + label */
+.planet-visual {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+/* The sphere itself — a div with radial gradient + inset shadow */
+.planet-sphere {
+  position: relative;
+  border-radius: 50%;
+  overflow: hidden;
+  transition: transform 0.3s ease;
+}
+
+.planet-sphere:hover {
+  transform: scale(1.05);
+}
+
+/* Atmosphere halo — sits behind the sphere */
+.planet-atmosphere {
+  position: absolute;
+  inset: -15%;
+  border-radius: 50%;
+  opacity: var(--atmosphere-opacity, 0.5);
+  pointer-events: none;
+  z-index: -1;
+  filter: blur(8px);
+}
+
+/* Labels under the planet */
+.planet-visual-label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--color-text);
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.planet-visual-size {
+  font-size: 0.7rem;
+  color: var(--color-text-muted);
+}
+
+/* Size comparison section */
+.planet-size-compare {
+  background: var(--color-bg-input);
+  border-radius: var(--radius);
+  padding: 1.25rem;
+  margin-bottom: 1.5rem;
+  border: 1px solid var(--color-border);
+}
+
+.planet-size-compare h4 {
+  margin-bottom: 1rem;
+  color: var(--color-text);
+  font-size: 1rem;
+}
+
+.planet-size-visuals {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 2rem;
+  padding: 1rem 0;
+  min-height: 120px;
+}
+
+.planet-size-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.planet-size-ratio {
+  text-align: center;
+  font-size: 0.85rem;
+  color: var(--color-text-muted);
+  margin-top: 0.75rem;
+  font-style: italic;
+}
+
+/* When a planet is too small to render meaningfully */
+.planet-too-small {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+  opacity: 0.6;
+}
+
+.planet-dot {
+  border-radius: 50%;
+  background: var(--color-text-muted);
+}
+
+/* Planet visual in comparison header */
+.planet-select-visual {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 0.5rem;
+}
+
+/* Side-by-side size comparisons in comparison modal */
+.comparison-size-comparison {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  margin: 1rem 0;
+}
+
+.comparison-size-comparison .planet-size-compare {
+  margin-bottom: 0;
+  background: rgba(255, 255, 255, 0.02);
+}
+
 /* ===== Skeleton Enhancements ===== */
 .skeleton-planet {
   height: 100px;
@@ -953,5 +1107,18 @@ body {
   .compare-mode-banner {
     flex-direction: column;
     align-items: stretch;
+  }
+
+  .comparison-size-comparison {
+    grid-template-columns: 1fr;
+  }
+
+  .planet-size-visuals {
+    gap: 1rem;
+  }
+
+  .potd-planet-info-row {
+    flex-direction: column;
+    align-items: flex-start;
   }
 }

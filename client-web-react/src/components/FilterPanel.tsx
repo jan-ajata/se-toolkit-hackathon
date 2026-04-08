@@ -23,25 +23,42 @@ function toEarth(realValue: number | undefined, unit: 'radius' | 'mass'): number
   return unit === 'radius' ? realValue / EARTH_RADIUS_KM : realValue / EARTH_MASS_KG;
 }
 
+/** Format a large number for display in the mass input (scientific notation string) */
+function formatMassValue(val: number): string {
+  if (val === 0) return '0';
+  if (Math.abs(val) >= 1e3 || (Math.abs(val) < 0.01 && val !== 0)) {
+    return val.toExponential(3);
+  }
+  return val.toFixed(2);
+}
+
+/** Parse a string that may be in scientific notation */
+function parseNumber(raw: string): number | undefined {
+  const trimmed = raw.trim();
+  if (trimmed === '') return undefined;
+  const num = Number(trimmed);
+  return Number.isNaN(num) ? undefined : num;
+}
+
 export default function FilterPanel({ filters, onFilterChange, useRealValues }: FilterPanelProps) {
   const [search, setSearch] = useState(filters.search ?? '');
 
   /* ---- display values (converted from stored Earth-relative) ---- */
   const displayMinRadius = useMemo(
-    () => toReal(filters.min_radius, 'radius'),
-    [filters.min_radius]
+    () => (useRealValues ? toReal(filters.min_radius, 'radius') : filters.min_radius),
+    [filters.min_radius, useRealValues]
   );
   const displayMaxRadius = useMemo(
-    () => toReal(filters.max_radius, 'radius'),
-    [filters.max_radius]
+    () => (useRealValues ? toReal(filters.max_radius, 'radius') : filters.max_radius),
+    [filters.max_radius, useRealValues]
   );
   const displayMinMass = useMemo(
-    () => toReal(filters.min_mass, 'mass'),
-    [filters.min_mass]
+    () => (useRealValues ? toReal(filters.min_mass, 'mass') : filters.min_mass),
+    [filters.min_mass, useRealValues]
   );
   const displayMaxMass = useMemo(
-    () => toReal(filters.max_mass, 'mass'),
-    [filters.max_mass]
+    () => (useRealValues ? toReal(filters.max_mass, 'mass') : filters.max_mass),
+    [filters.max_mass, useRealValues]
   );
 
   /* ---- handlers ---- */
@@ -51,22 +68,22 @@ export default function FilterPanel({ filters, onFilterChange, useRealValues }: 
 
   const handleRadiusChange = useCallback(
     (which: 'min' | 'max', raw: string) => {
-      const num = raw === '' ? undefined : parseFloat(raw);
-      const earthVal = toEarth(num, 'radius');
+      const num = parseNumber(raw);
+      const earthVal = useRealValues ? toEarth(num, 'radius') : num;
       const key = which === 'min' ? 'min_radius' : 'max_radius';
       onFilterChange({ ...filters, [key]: earthVal, page: 1 });
     },
-    [filters, onFilterChange]
+    [filters, onFilterChange, useRealValues]
   );
 
   const handleMassChange = useCallback(
     (which: 'min' | 'max', raw: string) => {
-      const num = raw === '' ? undefined : parseFloat(raw);
-      const earthVal = toEarth(num, 'mass');
+      const num = parseNumber(raw);
+      const earthVal = useRealValues ? toEarth(num, 'mass') : num;
       const key = which === 'min' ? 'min_mass' : 'max_mass';
       onFilterChange({ ...filters, [key]: earthVal, page: 1 });
     },
-    [filters, onFilterChange]
+    [filters, onFilterChange, useRealValues]
   );
 
   const handleCheckboxChange = useCallback(
@@ -139,20 +156,18 @@ export default function FilterPanel({ filters, onFilterChange, useRealValues }: 
           <span className="filter-range-label">Mass ({massUnit})</span>
           <div className="filter-range-inputs">
             <input
-              type="number"
-              min="0"
-              step={useRealValues ? 1e23 : 0.1}
-              value={displayMinMass ?? ''}
+              type="text"
+              inputMode="decimal"
+              value={displayMinMass != null ? formatMassValue(displayMinMass) : ''}
               onChange={(e) => handleMassChange('min', e.target.value)}
               placeholder={`Min ${massUnit}`}
               className="range-min"
             />
             <span className="range-separator">–</span>
             <input
-              type="number"
-              min="0"
-              step={useRealValues ? 1e23 : 0.1}
-              value={displayMaxMass ?? ''}
+              type="text"
+              inputMode="decimal"
+              value={displayMaxMass != null ? formatMassValue(displayMaxMass) : ''}
               onChange={(e) => handleMassChange('max', e.target.value)}
               placeholder={`Max ${massUnit}`}
               className="range-max"

@@ -21,16 +21,5 @@ class Settings(BaseSettings):
     db_user: str = Field(..., alias="DB_USER")
     db_password: str = Field(..., alias="DB_PASSWORD")
 
-    # LLM settings (V2) — optional, enabled when LLM_API_KEY is set
-    llm_api_key: str | None = Field(default=None, alias="LLM_API_KEY")
-    llm_api_base_url: str = Field(
-        default="https://api.openai.com/v1", alias="LLM_API_BASE_URL"
-    )
-    llm_model: str = Field(default="gpt-4o-mini", alias="LLM_MODEL")
-
-    @property
-    def llm_enabled(self) -> bool:
-        return bool(self.llm_api_key)
-
 
 settings = Settings.model_validate({})
