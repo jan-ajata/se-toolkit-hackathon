@@ -1,22 +1,22 @@
 # 🪐 Exoplanet Explorer
 
-A web dashboard that lets you browse, filter, and calculate survival metrics for confirmed exoplanets — with AI-powered comparisons.
+A web dashboard that lets you browse, filter, and calculate survival metrics for confirmed exoplanets — with visual planet comparisons and procedural planet rendering.
 
-> **One-liner:** Browse, filter, and calculate survival metrics for confirmed exoplanets — with AI-powered comparisons and Planet of the Day.
+> **One-liner:** Browse, filter, and calculate survival metrics for confirmed exoplanets — with visual planet comparisons and Planet of the Day.
 
 ---
 
 ## Demo
 
 ### Exoplanet List View
-The main dashboard shows a filterable catalog of exoplanets with key statistics at the top.
+The main dashboard shows a filterable catalog of 4,500+ exoplanets with aggregate stats at the top. Each row includes a procedural planet sphere colored by temperature.
 
-![Exoplanet List View](https://via.placeholder.com/800x400/0b0f19/6366f1?text=Exoplanet+List+View+—+filterable+catalog+with+stats)
+![Exoplanet List View](image.png)
 
 ### Planet Detail & Survival Calculator
-Click any planet to see full details and the "Could You Survive There?" calculator.
+Click any planet to see full details with a size-comparison visualization against Earth and the "Could You Survive There?" calculator.
 
-![Survival Calculator](https://via.placeholder.com/800x400/0b0f19/06b6d4?text=Survival+Calculator+—+weight,+travel+time,+temperature+verdict)
+![Survival Calculator](image-1.png)
 
 ---
 
@@ -31,9 +31,10 @@ Exoplanet discoveries are growing rapidly (5,000+ confirmed), but the data is bu
 
 ### Solution
 Exoplanet Explorer provides a clean, accessible web interface to:
-- **Browse** the catalog of confirmed exoplanets
-- **Filter** by radius, mass, habitable zone, constellation, and name
+- **Browse** the catalog of confirmed exoplanets with procedural visual spheres
+- **Filter** by radius, mass, habitable zone, and name
 - **Calculate** survival metrics — your weight on the planet, travel time, temperature verdict, and gravity verdict
+- **Compare** any two planets with a detailed numerical side-by-side table
 
 ---
 
@@ -59,10 +60,12 @@ Exoplanet Explorer provides a clean, accessible web interface to:
 ## Features
 
 ### Implemented (V1 + V2)
-- ✅ **Exoplanet catalog** — seeded from NASA Exoplanet Archive TAP API on first run
-- ✅ **Filterable list view** — search by name, filter by radius/mass, habitable zone
+- ✅ **Exoplanet catalog** — 4,571 planets seeded from NASA Exoplanet Archive TAP API on first run
+- ✅ **Mass estimation** — when NASA has no mass measurement, it's estimated from radius using a piecewise power-law (rocky R^3.7, mini-Neptune R^2.3, gas giant R^1.7) with an `≈` indicator
+- ✅ **Filterable list view** — search by name, filter by radius/mass range, habitable zone
 - ✅ **Server-side pagination** — efficient loading of large datasets
-- ✅ **Planet detail modal** — full stats for any planet with one click
+- ✅ **Procedural planet visuals** — CSS-only gradient spheres colored by temperature with atmosphere glow from insolation flux
+- ✅ **Planet detail modal** — full stats with Earth-relative size comparison visualization
 - ✅ **"Could You Survive There?" calculator** — enter your weight, see:
   - Your weight on the planet
   - Surface gravity in m/s²
@@ -72,12 +75,12 @@ Exoplanet Explorer provides a clean, accessible web interface to:
   - Temperature verdict (freeze / temperate / burn)
   - Gravity verdict (light / manageable / crushing)
 - ✅ **Aggregate stats** — total count, habitable zone count, closest planet, average radius
-- ✅ **AI-powered planet comparisons** — select two planets, get AI-generated natural-language comparison with side-by-side stats
-- ✅ **Planet of the Day** — daily featured planet with AI-generated fun fact
+- ✅ **Numerical planet comparison** — select two planets for a side-by-side table with gravity, density, and insolation verdicts
+- ✅ **Planet of the Day** — daily featured planet with a data-driven fun fact
 - ✅ **Dark space theme UI** — responsive design with loading skeletons
 - ✅ **Docker Compose** — all services orchestrated (PostgreSQL, backend, frontend, Caddy)
 - ✅ **Swagger UI** — interactive API docs at `/docs`
-- ✅ **Full test suite** — calculator, DB layer, API endpoints, and LLM module tests
+- ✅ **Full test suite** — 60 tests covering calculator, DB layer, and API endpoints
 
 ---
 
@@ -123,9 +126,6 @@ All variables are documented in `.env.example`. The most important ones:
 |---|---|---|
 | `DB_PASSWORD` | PostgreSQL password | `exoplanet_pass` |
 | `API_KEY` | Backend API key | `dev-api-key` |
-| `LLM_API_KEY` | OpenAI-compatible API key for AI features | _(empty)_ |
-| `LLM_API_BASE_URL` | LLM API base URL | `https://api.openai.com/v1` |
-| `LLM_MODEL` | LLM model name | `gpt-4o-mini` |
 | `BACKEND_PORT_EXTERNAL` | Backend port | `8000` |
 | `CLIENT_PORT_EXTERNAL` | Frontend port | `3000` |
 | `CADDY_HTTP_PORT` | Caddy proxy port | `8080` |
@@ -192,20 +192,18 @@ se-toolkit-hackathon/
 ├── backend/
 │   ├── src/exoplanet_explorer/
 │   │   ├── main.py              # FastAPI app, lifespan, middleware
-│   │   ├── settings.py          # Pydantic settings (+ LLM config)
+│   │   ├── settings.py          # Pydantic settings
 │   │   ├── database.py          # Async engine + session
 │   │   ├── auth.py              # API key verification
 │   │   ├── calculator.py        # Survival metrics calculations
-│   │   ├── llm.py               # LLM client (compare, fun fact)
 │   │   ├── models/exoplanet.py  # SQLModel models + Pydantic schemas
 │   │   ├── db/exoplanets.py     # DB operations
-│   │   ├── routers/exoplanets.py # API endpoints (+ /compare, /planet-of-the-day)
+│   │   ├── routers/exoplanets.py # API endpoints
 │   │   └── data/seed.py         # NASA TAP API seed script
 │   ├── tests/
 │   │   ├── test_calculator.py
 │   │   ├── test_db_exoplanets.py
-│   │   ├── test_api_exoplanets.py
-│   │   └── test_llm.py
+│   │   └── test_api_exoplanets.py
 │   ├── pyproject.toml
 │   └── Dockerfile
 ├── client-web-react/
@@ -214,13 +212,15 @@ se-toolkit-hackathon/
 │   │   ├── App.css              # Global styles
 │   │   ├── api/client.ts        # API client
 │   │   ├── components/
-│   │   │   ├── ExoplanetList.tsx
-│   │   │   ├── ExoplanetDetail.tsx
-│   │   │   ├── SurvivalCalculator.tsx
-│   │   │   ├── FilterPanel.tsx
-│   │   │   ├── StatsCards.tsx
-│   │   │   ├── ComparisonModal.tsx    # V2: AI comparison
-│   │   │   └── PlanetOfDay.tsx        # V2: Featured planet
+│   │   │   ├── ExoplanetList.tsx       # Table with planet visuals
+│   │   │   ├── ExoplanetDetail.tsx     # Modal with size comparison
+│   │   │   ├── SurvivalCalculator.tsx  # "Could You Survive There?"
+│   │   │   ├── FilterPanel.tsx         # Search + range filters
+│   │   │   ├── StatsCards.tsx          # Aggregate stats
+│   │   │   ├── ComparisonModal.tsx     # Numerical side-by-side
+│   │   │   ├── PlanetOfDay.tsx         # Featured planet
+│   │   │   ├── PlanetVisual.tsx        # CSS procedural planet
+│   │   │   └── PlanetSizeCompare.tsx   # Earth-relative sizing
 │   │   └── types/exoplanet.ts   # TypeScript types
 │   ├── package.json
 │   ├── vite.config.ts
